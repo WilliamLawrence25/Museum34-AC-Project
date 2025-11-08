@@ -108,11 +108,6 @@ const ModalInformation = ({ isOpen = true, id = 0, onClose = () => {} }) => {
 
 
   const handleAddFavorite = async () => {
-    if (!isLogin) {
-      setFavoriteMessage("Debes iniciar sesión para agregar a favoritos.");
-      setTimeout(() => setFavoriteMessage(""), 3000); 
-      return;
-    }
   
     try {
       const response = await api.get("/favoritos/");
@@ -259,14 +254,12 @@ const ModalInformation = ({ isOpen = true, id = 0, onClose = () => {} }) => {
   }, [isHandsOpen]); // Este efecto depende de isHandsOpen
 
   useEffect(() => {
-    // Busca el modelo basado en el ID recibido o usa valores por defecto
+    // Busca el modelo basado en el ID recibido
     const foundModel = data.find((item) => item.id === id);
-    setModelData(foundModel || modelData);
+    if (foundModel) {
+      setModelData(foundModel);
+    }
   }, [id]);
-
-  useEffect(() => {
-    console.log("Modal abierto:", isOpen); // Confirmar estado del modal
-  }, [isOpen]);
 
 
   if (!isOpen) return null;
@@ -279,19 +272,6 @@ const ModalInformation = ({ isOpen = true, id = 0, onClose = () => {} }) => {
         </button>
         <div className="modal-content">
           
-        <div className="favorite-section">
-          {isLogin ? (
-            <button onClick={handleAddFavorite} disabled={isFavorite}>
-              {isFavorite ? "Ya está en tus favoritos" : "Agregar a favoritos"}
-            </button>
-          ) : (
-            <p className="login-prompt">
-              Debes estar registrado para agregar a favoritos. <a href="/login">Inicia sesión aquí</a>.
-            </p>
-          )}
-          {favoriteMessage && <p className="favorite-message">{favoriteMessage}</p>}
-        </div>
-          {/* Modelo 3D en el lado izquierdo */}
           <div className="model-viewer">
             <ThreeViewer model={modelData} path={modelData.path} handData={handData} scale_={scale_}/>
           </div>

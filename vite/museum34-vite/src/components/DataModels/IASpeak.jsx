@@ -17,10 +17,8 @@ export default function IASpeak({ title, description }) {
   };
 
   return (
-    <button className="btn-leer" onClick={handleSpeakToggle}>
-      <span className="material-symbols-outlined">
-        volume_up
-      </span>
+    <button className="btn-leer" onClick={handleSpeakToggle} title={isSpeaking ? "Detener lectura" : "Leer descripción"}>
+      {isSpeaking ? "Detener" : "Leer"}
     </button>
   );
 }

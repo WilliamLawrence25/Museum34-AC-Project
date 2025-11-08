@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import styled from "styled-components";
-import home from "../images/icons/home.png";
 import perfil from "../images/icons/perfil.png";
 import config from "../images/icons/config.png";
 import info from "../images/icons/info.png";
-import { useNavigate } from 'react-router-dom'; // Importar useNavigate
+import mic from "../images/icons/mic.png";
+import nomic from "../images/icons/nomic.png";
 
 // Contenedor del menú inferior
 const BottomMenuContainer = styled.div`
@@ -81,18 +81,12 @@ const FadeIn = styled.div`
   }
 `;
 
-const BottomMenu = ({ setActiveSection  }) => {
+const BottomMenu = ({ setActiveSection, isMuted, toggleMute }) => {
   const [isVisible, setIsVisible] = useState(false);
 
   // Manejadores de eventos para mostrar/ocultar el menú
   const handleMouseEnter = () => setIsVisible(true);
   const handleMouseLeave = () => setIsVisible(false);
-  const navigate = useNavigate(); 
-  const handleNavigation = (path) => {
-    navigate(path);
-    window.location.reload(); 
-  };
-
 
   useEffect(() => {
     const handleKeyDown = (event) => {
@@ -110,7 +104,7 @@ const BottomMenu = ({ setActiveSection  }) => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [setActiveSection]); // Dependencia para asegurar que setActiveSection siempre esté actualizado
+  }, [setActiveSection]);
 
   return (
     <div
@@ -120,23 +114,22 @@ const BottomMenu = ({ setActiveSection  }) => {
     >
       <FadeIn>
         <BottomMenuContainer isVisible={isVisible}>
-          <MenuButton onClick={() => handleNavigation("/")}>
-            <Icon src={home} alt="Home" />
-            Inicio
-          </MenuButton>
-          
           <MenuButton onClick={() => setActiveSection("perfil")}>
-          <Icon src={perfil} alt="Perfil" />
-          Perfil
-        </MenuButton>
-        <MenuButton onClick={() => setActiveSection("config")}>
-          <Icon src={config} alt="Configuración" />
-          Configuración
-        </MenuButton>
-        <MenuButton onClick={() => setActiveSection("info")}>
-          <Icon src={info} alt="Información" />
-          Info
-        </MenuButton>
+            <Icon src={perfil} alt="Perfil" />
+            Perfil
+          </MenuButton>
+          <MenuButton onClick={() => setActiveSection("config")}>
+            <Icon src={config} alt="Configuración" />
+            Configuración
+          </MenuButton>
+          <MenuButton onClick={() => setActiveSection("info")}>
+            <Icon src={info} alt="Información" />
+            Info
+          </MenuButton>
+          <MenuButton onClick={toggleMute}>
+            <Icon src={isMuted ? nomic : mic} alt={isMuted ? "Activar Sonido" : "Silenciar"} />
+            {isMuted ? "Sonido" : "Mute"}
+          </MenuButton>
         </BottomMenuContainer>
       </FadeIn>
     </div>

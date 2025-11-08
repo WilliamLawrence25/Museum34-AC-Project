@@ -17,7 +17,7 @@ const fadeIn = keyframes`
 const HelpContainer = styled.div`
   position: fixed;
   top: 64px; /* moved below the button so it never overlaps */
-  right: 20px;
+  left: 20px;
   max-width: 600px;
   background: linear-gradient(135deg, #78ade6, #a5d8ff);
   border-radius: 12px;
@@ -61,7 +61,7 @@ const CloseButton = styled.button`
 const HelpButton = styled.button`
   position: fixed;
   top: 20px;
-  right: 20px;
+  left: 20px;
   background-color: #4a90e2;
   color: #fff;
   border: none;

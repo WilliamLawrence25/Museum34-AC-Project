@@ -82,6 +82,72 @@ const MusicButton = styled.button`
   }
 `;
 
+const StatsPanel = styled.div`
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  background: linear-gradient(135deg, rgba(30, 31, 41, 0.9), rgba(58, 59, 70, 0.9));
+  padding: 15px;
+  border-radius: 10px;
+  color: #fff;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  z-index: 9998;
+  border: 1px solid rgba(108, 238, 181, 0.3);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  min-width: 200px;
+`;
+
+const HintBox = styled.div`
+  position: fixed;
+  bottom: 200px;
+  right: 20px;
+  background: linear-gradient(135deg, rgba(108, 238, 181, 0.95), rgba(78, 205, 196, 0.95));
+  padding: 12px 18px;
+  border-radius: 12px;
+  color: #1e1f29;
+  font-weight: 600;
+  font-size: 14px;
+  z-index: 9998;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  animation: fadeInSlide 0.5s ease-out;
+  max-width: 250px;
+  
+  @keyframes fadeInSlide {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+`;
+
+const TeleportButton = styled.button`
+  background: linear-gradient(135deg, #6CEEB5, #4ECDC4);
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  color: #1e1f29;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin: 5px;
+  box-shadow: 0 2px 8px rgba(108, 238, 181, 0.4);
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(108, 238, 181, 0.6);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 const MuseumVirtual = () => {
   // Estados principales
   const [isLoaded, setIsLoaded] = useState(false);
@@ -107,9 +173,17 @@ const MuseumVirtual = () => {
   const [isConfigOpen, setIsConfigOpen] = useState(false);
   const [isInfoOpen, setIsInfoOpen] = useState(false);
 
+  // Estados de mejoras visuales
+  const [showStats, setShowStats] = useState(false);
+  const [playerPosition, setPlayerPosition] = useState({ x: 0, y: 0, z: 0 });
+  const [fps, setFps] = useState(60);
+  const [currentHint, setCurrentHint] = useState(0);
+  const [showTeleportMenu, setShowTeleportMenu] = useState(false);
+
   // Refs
   const playerRef = useRef(null);
   const audioRef = useRef(null);
+  const lastFrameTime = useRef(performance.now());
 
   // Variables calculadas
   const volumenNormalizado = volumen / 100;
@@ -154,6 +228,37 @@ const MuseumVirtual = () => {
   const toggleMute = () => {
     setIsMuted((prev) => !prev);
   };
+
+  const teleportTo = (x, y, z) => {
+    if (playerRef.current) {
+      playerRef.current.setAttribute('position', { x, y, z });
+      playClickSound();
+      setShowTeleportMenu(false);
+    }
+  };
+
+  const toggleStats = () => {
+    setShowStats((prev) => !prev);
+  };
+
+  const hints = [
+    "💡 Usa WASD para moverte por el museo",
+    "💡 Presiona Shift para correr más rápido",
+    "💡 Presiona Espacio para saltar",
+    "💡 Usa E para interactuar con las obras",
+    "💡 Presiona P para ver tu perfil",
+    "💡 Presiona C para configuración",
+    "💡 Presiona T para teletransportarte",
+    "💡 Presiona F para mostrar estadísticas",
+  ];
+
+  const teleportLocations = [
+    { name: "Entrada", x: 0, y: 1.6, z: 0 },
+    { name: "Sala Central", x: 0, y: 1.6, z: -15 },
+    { name: "Galería Este", x: 15, y: 1.6, z: -10 },
+    { name: "Galería Oeste", x: -15, y: 1.6, z: -10 },
+    { name: "Sala Posterior", x: 0, y: 1.6, z: -30 },
+  ];
 
   const handleConfigChange = (newConfig) => {
     if (newConfig.brillo !== undefined) setBrillo(newConfig.brillo);
@@ -249,6 +354,8 @@ const MuseumVirtual = () => {
 
       const handlePositionUpdate = (event) => {
         const { x, z } = event.detail;
+        const y = playerEl.getAttribute('position').y;
+        setPlayerPosition({ x: x.toFixed(2), y: y.toFixed(2), z: z.toFixed(2) });
         checkInteractionZone(x, z);
       };
 
@@ -269,6 +376,39 @@ const MuseumVirtual = () => {
     };
 
     waitForPlayerRef();
+  }, []);
+
+  // FPS Counter
+  useEffect(() => {
+    let animationFrameId;
+    
+    const updateFPS = () => {
+      const now = performance.now();
+      const delta = now - lastFrameTime.current;
+      const currentFps = Math.round(1000 / delta);
+      setFps(currentFps);
+      lastFrameTime.current = now;
+      animationFrameId = requestAnimationFrame(updateFPS);
+    };
+
+    if (showStats) {
+      animationFrameId = requestAnimationFrame(updateFPS);
+    }
+
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, [showStats]);
+
+  // Sistema de hints rotativos
+  useEffect(() => {
+    const hintInterval = setInterval(() => {
+      setCurrentHint((prev) => (prev + 1) % hints.length);
+    }, 8000);
+
+    return () => clearInterval(hintInterval);
   }, []);
 
   // Sistema de sonido de pasos
@@ -356,6 +496,21 @@ const MuseumVirtual = () => {
         playClickSound();
         setIsModalOpen(true);
       }
+      
+      // F para mostrar/ocultar estadísticas
+      if (event.key === 'f' || event.key === 'F') {
+        setShowStats((prev) => !prev);
+      }
+      
+      // T para menú de teletransporte
+      if (event.key === 't' || event.key === 'T') {
+        setShowTeleportMenu((prev) => !prev);
+      }
+      
+      // M para mutear/desmutear
+      if (event.key === 'm' || event.key === 'M') {
+        toggleMute();
+      }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -374,6 +529,15 @@ const MuseumVirtual = () => {
         to {
           opacity: 1;
           transform: translateX(-50%) translateY(0);
+        }
+      }
+      
+      @keyframes pulse {
+        0%, 100% {
+          box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.5), 0 0 0 0 rgba(108, 238, 181, 0.7);
+        }
+        50% {
+          box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.5), 0 0 0 15px rgba(108, 238, 181, 0);
         }
       }
     `;
@@ -397,6 +561,55 @@ const MuseumVirtual = () => {
         >
           {isMuted ? "🔇" : "🔊"}
         </MusicButton>
+      )}
+
+      {/* Panel de estadísticas */}
+      {isLoaded && showStats && (
+        <StatsPanel>
+          <div style={{ marginBottom: '10px', borderBottom: '1px solid rgba(108, 238, 181, 0.3)', paddingBottom: '8px' }}>
+            <strong style={{ color: '#6CEEB5' }}>📊 ESTADÍSTICAS</strong>
+          </div>
+          <div style={{ lineHeight: '1.6' }}>
+            <div>FPS: <span style={{ color: fps > 50 ? '#6CEEB5' : fps > 30 ? '#FFD700' : '#ff6666' }}>{fps}</span></div>
+            <div style={{ marginTop: '8px', color: '#6CEEB5' }}>POSICIÓN:</div>
+            <div>X: {playerPosition.x}</div>
+            <div>Y: {playerPosition.y}</div>
+            <div>Z: {playerPosition.z}</div>
+            <div style={{ marginTop: '8px', fontSize: '10px', color: 'rgba(255,255,255,0.5)' }}>
+              Presiona F para ocultar
+            </div>
+          </div>
+        </StatsPanel>
+      )}
+
+      {/* Sistema de hints */}
+      {isLoaded && (
+        <HintBox>
+          {hints[currentHint]}
+        </HintBox>
+      )}
+
+      {/* Menú de teletransporte */}
+      {isLoaded && showTeleportMenu && (
+        <ModalContainer style={{ width: '400px', height: 'auto', maxHeight: '500px' }}>
+          <div style={{ color: '#fff' }}>
+            <h2 style={{ marginBottom: '20px', color: '#6CEEB5' }}>🌀 Teletransporte Rápido</h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {teleportLocations.map((location, index) => (
+                <TeleportButton 
+                  key={index}
+                  onClick={() => teleportTo(location.x, location.y, location.z)}
+                >
+                  📍 {location.name}
+                </TeleportButton>
+              ))}
+            </div>
+            <div style={{ marginTop: '20px', fontSize: '12px', color: 'rgba(255,255,255,0.6)' }}>
+              Presiona <strong>T</strong> para cerrar
+            </div>
+          </div>
+          <CloseButton onClick={() => setShowTeleportMenu(false)}>✖</CloseButton>
+        </ModalContainer>
       )}
 
       {isLoaded && (
@@ -458,13 +671,13 @@ const MuseumVirtual = () => {
             left: "50%",
             transform: "translateX(-50%)",
             zIndex: 1000,
-            background: "rgba(30, 31, 41, 0.95)",
-            padding: "16px 24px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 15px rgba(0, 0, 0, 0.5)",
-            border: "2px solid #6CEEB5",
+            background: "linear-gradient(135deg, rgba(30, 30, 40, 0.95), rgba(40, 40, 50, 0.95))",
+            padding: "15px 25px",
+            borderRadius: "15px",
+            boxShadow: "0px 8px 20px rgba(0, 0, 0, 0.5)",
+            border: "2px solid rgba(108, 238, 181, 0.5)",
             backdropFilter: "blur(10px)",
-            animation: "slideUp 0.3s ease-out",
+            animation: "slideUp 0.3s ease-out, pulse 2s infinite",
           }}
         >
           <button
@@ -474,34 +687,45 @@ const MuseumVirtual = () => {
               fontSize: "16px",
               fontWeight: "600",
               background: isModalOpen 
-                ? "#FF5C5C" 
-                : "#6CEEB5",
+                ? "linear-gradient(135deg, #FF5C5C, #FF3333)" 
+                : "linear-gradient(135deg, #6CEEB5, #4ECDC4)",
               color: "#fff",
               border: "none",
-              borderRadius: "8px",
+              borderRadius: "10px",
               cursor: "pointer",
-              transition: "all 0.2s ease",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
-              width: "100%",
+              transition: "all 0.3s ease",
+              boxShadow: isModalOpen 
+                ? "0 4px 12px rgba(255, 92, 92, 0.4)" 
+                : "0 4px 12px rgba(108, 238, 181, 0.4)",
+              textShadow: "0 2px 4px rgba(0, 0, 0, 0.3)",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
             }}
             onMouseEnter={(e) => {
               e.target.style.transform = "translateY(-2px)";
-              e.target.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.4)";
+              e.target.style.boxShadow = isModalOpen 
+                ? "0 6px 16px rgba(255, 92, 92, 0.6)" 
+                : "0 6px 16px rgba(108, 238, 181, 0.6)";
             }}
             onMouseLeave={(e) => {
               e.target.style.transform = "translateY(0)";
-              e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
+              e.target.style.boxShadow = isModalOpen 
+                ? "0 4px 12px rgba(255, 92, 92, 0.4)" 
+                : "0 4px 12px rgba(108, 238, 181, 0.4)";
             }}
           >
-            {isModalOpen ? "Cerrar" : buttonText}
+            <span style={{ fontSize: "18px" }}>{isModalOpen ? "✖" : "📖"}</span>
+            {isModalOpen ? "Cerrar Modal" : buttonText}
           </button>
           <div style={{
             marginTop: "8px",
             textAlign: "center",
             fontSize: "12px",
             color: "rgba(255, 255, 255, 0.7)",
+            fontStyle: "italic"
           }}>
-            Presiona <strong style={{ color: "#6CEEB5" }}>E</strong> para {isModalOpen ? "cerrar" : "abrir"}
+            Presiona <strong style={{ color: "#6CEEB5" }}>E</strong> para abrir
           </div>
         </div>
       )}
@@ -540,7 +764,11 @@ const MuseumVirtual = () => {
 
       {isLoaded && (
         <div style={{ filter: `brightness(${brilloCSS})`, height: "100%", width: "100%" }}>
-          <Scene style={{ display: contentDisplay }} physics="driver: local; gravity: 0 0 0">
+          <Scene 
+            style={{ display: contentDisplay }} 
+            physics="driver: local; gravity: 0 0 0"
+            fog="type: linear; color: #1a1a2e; near: 10; far: 50"
+          >
             <a-assets>
               <a-mixin id="checkpoint"></a-mixin>
               <a-mixin id="checkpoint-hovered" color="#6CEEB5"></a-mixin>
@@ -575,6 +803,17 @@ const MuseumVirtual = () => {
             </a-assets>
 
             <a-sky src="#sky_sphere-texture"></a-sky>
+
+            {/* Partículas flotantes decorativas */}
+            {[...Array(15)].map((_, i) => (
+              <Entity
+                key={`particle-${i}`}
+                geometry="primitive: sphere; radius: 0.05"
+                material={`color: #6CEEB5; emissive: #6CEEB5; emissiveIntensity: 0.5; opacity: 0.6; transparent: true`}
+                position={`${(Math.random() - 0.5) * 40} ${Math.random() * 5 + 1} ${(Math.random() - 0.5) * 40}`}
+                animation={`property: position; to: ${(Math.random() - 0.5) * 40} ${Math.random() * 5 + 3} ${(Math.random() - 0.5) * 40}; loop: true; dir: alternate; dur: ${3000 + Math.random() * 4000}; easing: easeInOutSine`}
+              />
+            ))}
 
             {/* Museo principal SIN colisión para poder caminar libremente */}
             <Entity
@@ -669,6 +908,41 @@ const MuseumVirtual = () => {
                 intensity={light.intensity}
                 position={`${light.position.x} ${light.position.y} ${light.position.z}`}
                 distance={light.distance}
+              />
+            ))}
+
+            {/* Elementos Decorativos CON colisión */}
+            
+            {/* Esferas decorativas */}
+            {museumModelsConfig.decorations.spheres.map((sphere) => (
+              <Entity
+                key={sphere.id}
+                geometry={`primitive: sphere; radius: ${sphere.radius}`}
+                material={`color: ${sphere.color}; metalness: ${sphere.metalness}; roughness: ${sphere.roughness}`}
+                position={`${sphere.position.x} ${sphere.position.y} ${sphere.position.z}`}
+                static-body="shape: sphere"
+              />
+            ))}
+
+            {/* Cajas decorativas (pedestales) */}
+            {museumModelsConfig.decorations.boxes.map((box) => (
+              <Entity
+                key={box.id}
+                geometry={`primitive: box; width: ${box.size.x}; height: ${box.size.y}; depth: ${box.size.z}`}
+                material={`color: ${box.color}; roughness: ${box.roughness}`}
+                position={`${box.position.x} ${box.position.y} ${box.position.z}`}
+                static-body="shape: box"
+              />
+            ))}
+
+            {/* Cilindros decorativos (columnas) */}
+            {museumModelsConfig.decorations.cylinders.map((cylinder) => (
+              <Entity
+                key={cylinder.id}
+                geometry={`primitive: cylinder; radius: ${cylinder.radius}; height: ${cylinder.height}`}
+                material={`color: ${cylinder.color}; metalness: ${cylinder.metalness}`}
+                position={`${cylinder.position.x} ${cylinder.position.y} ${cylinder.position.z}`}
+                static-body="shape: cylinder"
               />
             ))}
 
