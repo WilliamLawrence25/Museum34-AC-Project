@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import { Entity, Scene } from "aframe-react";
 import BottomMenu from "./BottomMenu.jsx";
 import stepSound from "./audio/step-sound.ogg";
@@ -10,7 +10,6 @@ import Configuracion from "./Configuracion.jsx";
 import Informacion from "./Informacion.jsx";
 
 import models from '../models/index.js';
-import museumModelsConfig from './museumModelsConfig.js';
 
 import styled from "styled-components";
 
@@ -83,6 +82,109 @@ const MusicButton = styled.button`
 `;
 
 const MuseumVirtual = () => {
+  // ========== CONFIGURACIÓN DEL MUSEO ==========
+  
+  // Configuración de zonas de interacción
+  const INTERACTION_ZONES = useMemo(() => [
+    // Imágenes del muro norte
+    { id: 1, name: 'Imagen del Cañon del Colca', bounds: { xMin: -6, xMax: -2, zMin: -15, zMax: -11 } },
+    { id: 2, name: 'Imagen de la plaza de armas', bounds: { xMin: -3, xMax: 0, zMin: -15, zMax: -11 } },
+    { id: 3, name: 'Imagen de la campiña y Misti', bounds: { xMin: -0.5, xMax: 2.5, zMin: -15, zMax: -11 } },
+    { id: 4, name: 'Imagen alternativa de la plaza', bounds: { xMin: 1.5, xMax: 4.5, zMin: -15, zMax: -11 } },
+    // Imágenes del muro sur
+    { id: 5, name: 'Imagen del mirador', bounds: { xMin: 3, xMax: 6.5, zMin: 11, zMax: 15 } },
+    { id: 6, name: 'Imagen del volcán Misti', bounds: { xMin: 0.5, xMax: 4, zMin: 11, zMax: 15 } },
+    { id: 7, name: 'Imagen de la catedral', bounds: { xMin: -1.5, xMax: 1.5, zMin: 11, zMax: 15 } },
+    { id: 8, name: 'Imagen de la campiña', bounds: { xMin: -4, xMax: 1, zMin: 11, zMax: 15 } },
+    { id: 9, name: 'Imagen de las canteras de sillar', bounds: { xMin: -6.5, xMax: -3, zMin: 11, zMax: 15 } },
+    // Imágenes del muro este
+    { id: 10, name: 'Imagen del rocoto relleno', bounds: { xMin: 9.5, xMax: 14, zMin: -0.5, zMax: 2.5 } },
+    // Imágenes del muro oeste
+    { id: 11, name: 'Imagen lateral de las canteras de sillar', bounds: { xMin: -11.5, xMax: -8.5, zMin: -0.5, zMax: 2.5 } },
+    { id: 12, name: 'Imagen lateral de la cantera', bounds: { xMin: -15, xMax: -10.5, zMin: -0.5, zMax: 2.5 } },
+    // Modelos 3D del lado este
+    { id: 13, name: 'Modelo 3D de la catedral', bounds: { xMin: 6, xMax: 11, zMin: -7.5, zMax: -2 } },
+    { id: 14, name: 'Modelo 3D del águila', bounds: { xMin: 6, xMax: 11, zMin: 1.5, zMax: 6 } },
+    { id: 15, name: 'Modelo 3D del burro', bounds: { xMin: 6, xMax: 11, zMin: 5, zMax: 9 } },
+    { id: 16, name: 'Modelo 3D de la mujer', bounds: { xMin: 6, xMax: 11, zMin: 7, zMax: 11 } },
+    { id: 17, name: 'Modelo 3D del hombre', bounds: { xMin: 6, xMax: 11, zMin: 9.5, zMax: 13.5 } },
+    // Modelos 3D del lado oeste
+    { id: 18, name: 'Modelo 3D del portal', bounds: { xMin: -11, xMax: -6.5, zMin: 8, zMax: 13 } },
+    { id: 19, name: 'Modelo 3D de Furina', bounds: { xMin: -11, xMax: -6.5, zMin: -11, zMax: -7 } },
+    { id: 20, name: 'Modelo 3D del Misti', bounds: { xMin: -11, xMax: -6.5, zMin: -14, zMax: -10 } },
+  ], []);
+
+  // Configuración de modelos 3D
+  const MODELS_3D = useMemo(() => [
+    { id: 'furina', model: '#furina', pos: '-10 0.7 -9', rot: '0 90 0', scale: '1.3 1.3 1.3' },
+    { id: 'volcan', model: '#volcan', pos: '-10.2 0.6 -12', rot: '0 0 0', scale: '0.015 0.015 0.015' },
+    { id: 'catedral', model: '#catedral', pos: '10 1.8 -5', rot: '0 180 0', scale: '3 3 3' },
+    { id: 'donkey_sillar', model: '#donkey_sillar_polycam', pos: '9.2 0.99 7', rot: '0 0 0', scale: '2 2 2' },
+    { id: 'eagle_sillar', model: '#eagle_sillar_polycam', pos: '9.7 1.2 4', rot: '0 0 0', scale: '2 2 2' },
+    { id: 'barroco_andino', model: '#barroco_andino', pos: '-9.7 1.7 10', rot: '0 270 0', scale: '0.6 0.6 0.6' },
+    { id: 'sillar_plycam', model: '#sillar_plycam_1', pos: '9.5 1.6 11', rot: '0 180 0', scale: '4 4 4' },
+  ], []);
+
+  // Configuración de pedestales
+  const PODIUMS = useMemo(() => [
+    { id: 1, pos: '13 0 12.1' }, { id: 2, pos: '10 0 12.1' },
+    { id: 3, pos: '-13 0 12.1' }, { id: 4, pos: '-10 0 12.1' },
+    { id: 5, pos: '-5 0 6' }, { id: 6, pos: '-5 0 10' },
+    { id: 7, pos: '0 0 6' }, { id: 8, pos: '0 0 10' },
+    { id: 9, pos: '5 0 6' }, { id: 10, pos: '5 0 10' },
+  ], []);
+
+  // Configuración de lámparas
+  const LAMPS = useMemo(() => [
+    { id: 1, pos: '12 0 -12' }, { id: 2, pos: '0 0 0' },
+    { id: 3, pos: '-12.7 0 -12' }, { id: 4, pos: '-10 0 -12' },
+  ], []);
+
+  // Configuración de cuadros
+  const FRAMES = useMemo(() => [
+    { id: 'sillar3', material: '#sillarPhoto3', pos: '-7.2 0 0', scale: '1 1 1' },
+    { id: 'sillar2', material: '#sillarPhoto2', pos: '-6.2 -0.2 0', scale: '0.7 1.1 1' },
+    { id: 'rocoto', material: '#rocotoPhoto', pos: '18.8 -0.2 0', scale: '1.21 1.1 1' },
+    { id: 'sillar', material: '#sillarPhoto', pos: '1 0 12', scale: '1 1 1' },
+    { id: 'volcan2', material: '#volcanPhoto2', pos: '3.3 0 12', scale: '1 1 1' },
+    { id: 'catedral', material: '#catedralPhoto', pos: '5.6 0 12', scale: '1 1 1' },
+    { id: 'volcan', material: '#volcanPhoto', pos: '7.9 0 12', scale: '1 1 1' },
+    { id: 'mirador', material: '#miradorPhoto', pos: '10.2 0 12', scale: '1 1 1' },
+    { id: 'moonlight', material: '#moonlight-texture', pos: '-7.2 0 -12', rot: '0 180 0', scale: '1 1 1' },
+    { id: 'valle', material: '#vallePhoto', pos: '-4.9 0 -12', rot: '0 180 0', scale: '1 1 1' },
+    { id: 'valle2', material: '#vallePhoto2', pos: '-9.5 0 -12', rot: '0 180 0', scale: '1 1 1' },
+    { id: 'plaza2', material: '#plazaPhoto2', pos: '-2.6 0 -12', rot: '0 180 0', scale: '1 1 1' },
+  ], []);
+
+  // Configuración de luces puntuales
+  const POINT_LIGHTS = useMemo(() => [
+    { id: 1, color: '#FFF', intensity: 1.2, pos: '-10 3.5 -12' },
+    { id: 2, color: '#FFF', intensity: 1.2, pos: '10 3.5 -12' },
+    { id: 3, color: '#FFF', intensity: 1.0, pos: '0 3.5 12' },
+    { id: 4, color: '#FFF', intensity: 1.0, pos: '-10 3.5 10' },
+    { id: 5, color: '#FFF', intensity: 1.0, pos: '10 3.5 10' },
+    { id: 6, color: '#FFF', intensity: 0.8, pos: '-14 3 0' },
+    { id: 7, color: '#FFF', intensity: 0.8, pos: '14 3 0' },
+    { id: 8, color: '#FFF', intensity: 1.5, pos: '10 4 -5' },
+    { id: 9, color: '#FFF', intensity: 1.5, pos: '-10 4 10' },
+    { id: 10, color: '#FFF', intensity: 1.2, pos: '-10 3 -9' },
+    { id: 11, color: '#FFF', intensity: 1.0, pos: '0 5 0' },
+    { id: 12, color: '#FFF', intensity: 0.7, pos: '12 2.5 -10' },
+    { id: 13, color: '#FFF', intensity: 0.7, pos: '-12 2.5 -10' },
+    { id: 14, color: '#FFF', intensity: 0.7, pos: '12 2.5 10' },
+    { id: 15, color: '#FFF', intensity: 0.7, pos: '-12 2.5 10' },
+  ], []);
+
+  // Configuración de luces spotlight
+  const SPOT_LIGHTS = useMemo(() => [
+    { id: 1, color: '#FFF', intensity: 2, pos: '-4 4 -12', distance: 8 },
+    { id: 2, color: '#FFF', intensity: 2, pos: '4 4 -12', distance: 8 },
+    { id: 3, color: '#FFF', intensity: 2, pos: '-4 4 12', distance: 8 },
+    { id: 4, color: '#FFF', intensity: 2, pos: '4 4 12', distance: 8 },
+  ], []);
+
+  // ========== ESTADOS ==========
+  
   // Estados principales
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -131,13 +233,13 @@ const MuseumVirtual = () => {
   };
 
   const checkInteractionZone = (x, z) => {
-    const zone = museumModelsConfig.interactionZones.find(zone => 
+    const zone = INTERACTION_ZONES.find(zone => 
       x >= zone.bounds.xMin && x <= zone.bounds.xMax &&
       z >= zone.bounds.zMin && z <= zone.bounds.zMax
     );
     
     if (zone) {
-      setButtonText(`Abrir modal: ${zone.name}`);
+      setButtonText(`Abrir ${zone.name}`);
       setIdModal(zone.id);
       setInModel(true);
     } else {
@@ -547,18 +649,36 @@ const MuseumVirtual = () => {
 
               <img id="sky_sphere-texture" src={models.sky_sphere}></img>
 
-              {/* Assets desde configuración */}
-              {museumModelsConfig.assets.models3D.map((asset) => (
-                <a-asset-item key={asset.id} id={asset.id} src={models[asset.key]}></a-asset-item>
-              ))}
+              {/* Assets de modelos 3D */}
+              <a-asset-item id="furina" src={models.furina}></a-asset-item>
+              <a-asset-item id="volcan" src={models.volcan}></a-asset-item>
+              <a-asset-item id="catedral" src={models.catedral}></a-asset-item>
+              <a-asset-item id="donkey_sillar_polycam" src={models.donkey_sillar_polycam}></a-asset-item>
+              <a-asset-item id="eagle_sillar_polycam" src={models.eagle_sillar_polycam}></a-asset-item>
+              <a-asset-item id="barroco_andino" src={models.barroco_andino}></a-asset-item>
+              <a-asset-item id="sillar_plycam_1" src={models.sillar_plycam_1}></a-asset-item>
 
-              {museumModelsConfig.assets.objModels.map((asset) => (
-                <a-asset-item key={asset.id} id={asset.id} src={models[asset.key]}></a-asset-item>
-              ))}
+              {/* Assets de texturas */}
+              <img id="podiums-texture" src={models.podiumsTexture}></img>
+              <img id="lamps-texture" src={models.lampsTexture}></img>
+              <img id="moonlight-texture" src={models.moonlightTexture}></img>
+              <img id="catedralPhoto" src={models.catedralPhoto}></img>
+              <img id="volcanPhoto" src={models.volcanPhoto}></img>
+              <img id="miradorPhoto" src={models.miradorPhoto}></img>
+              <img id="volcanPhoto2" src={models.volcanPhoto2}></img>
+              <img id="plazaPhoto" src={models.plazaPhoto}></img>
+              <img id="sillarPhoto" src={models.sillarPhoto}></img>
+              <img id="rocotoPhoto" src={models.rocotoPhoto}></img>
+              <img id="plazaPhoto2" src={models.plazaPhoto2}></img>
+              <img id="sillarPhoto2" src={models.sillarPhoto2}></img>
+              <img id="sillarPhoto3" src={models.sillarPhoto3}></img>
+              <img id="vallePhoto" src={models.vallePhoto}></img>
+              <img id="vallePhoto2" src={models.vallePhoto2}></img>
 
-              {museumModelsConfig.assets.textures.map((asset) => (
-                <img key={asset.id} id={asset.id} src={models[asset.key]}></img>
-              ))}
+              {/* Assets de objetos */}
+              <a-asset-item id="podiums-obj" src={models.podiumsModel}></a-asset-item>
+              <a-asset-item id="lamps-obj" src={models.lampsModel}></a-asset-item>
+              <a-asset-item id="recuadro-obj" src={models.recuadroModel}></a-asset-item>
 
               <a-sound
                 src={audio1}
@@ -576,7 +696,7 @@ const MuseumVirtual = () => {
 
             <a-sky src="#sky_sphere-texture"></a-sky>
 
-            {/* Museo principal SIN colisión para poder caminar libremente */}
+            {/* Museo principal SIN colisión */}
             <Entity
               gltf-model="#main_museum"
               position="0 0 0"
@@ -584,90 +704,82 @@ const MuseumVirtual = () => {
               scale="1 1 1"
             ></Entity>
 
-            {/* Modelos 3D desde configuración CON colisión */}
-            {museumModelsConfig.models3D.map((model) => (
+            {/* Modelos 3D CON colisión */}
+            {MODELS_3D.map((model) => (
               <Entity
                 key={model.id}
                 gltf-model={model.model}
-                position={`${model.position.x} ${model.position.y} ${model.position.z}`}
-                rotation={`${model.rotation.x} ${model.rotation.y} ${model.rotation.z}`}
-                scale={`${model.scale.x} ${model.scale.y} ${model.scale.z}`}
+                position={model.pos}
+                rotation={model.rot}
+                scale={model.scale}
                 static-body="shape: box"
               />
             ))}
 
-            {/* Podiums desde configuración CON colisión */}
-            {museumModelsConfig.podiums.map((podium) => (
+            {/* Pedestales CON colisión */}
+            {PODIUMS.map((podium) => (
               <Entity
-                key={podium.id}
-                obj-model={`obj: ${podium.objModel}`}
-                material={`src: ${podium.material}`}
-                position={`${podium.position.x} ${podium.position.y} ${podium.position.z}`}
-                rotation={`${podium.rotation.x} ${podium.rotation.y} ${podium.rotation.z}`}
+                key={`podium-${podium.id}`}
+                obj-model="obj: #podiums-obj"
+                material="src: #podiums-texture"
+                position={podium.pos}
+                rotation="0 0 0"
                 static-body="shape: box"
               />
             ))}
 
-            {/* Lámparas desde configuración (sin colisión, son decorativas en el techo) */}
-            {museumModelsConfig.lamps.map((lamp) => (
+            {/* Lámparas decorativas */}
+            {LAMPS.map((lamp) => (
               <Entity
-                key={lamp.id}
-                obj-model={`obj: ${lamp.objModel}`}
-                material={`src: ${lamp.material}`}
-                position={`${lamp.position.x} ${lamp.position.y} ${lamp.position.z}`}
-                rotation={`${lamp.rotation.x} ${lamp.rotation.y} ${lamp.rotation.z}`}
-                scale={`${lamp.scale.x} ${lamp.scale.y} ${lamp.scale.z}`}
+                key={`lamp-${lamp.id}`}
+                obj-model="obj: #lamps-obj"
+                material="src: #lamps-texture"
+                position={lamp.pos}
+                rotation="0 0 0"
+                scale="1 1 1"
               />
             ))}
 
-            {/* Cuadros desde configuración (sin colisión, están en las paredes) */}
-            {museumModelsConfig.frames.map((frame) => (
+            {/* Cuadros en las paredes */}
+            {FRAMES.map((frame) => (
               <Entity
-                key={frame.id}
-                obj-model={`obj: ${frame.objModel}`}
+                key={`frame-${frame.id}`}
+                obj-model="obj: #recuadro-obj"
                 material={`src: ${frame.material}`}
-                position={`${frame.position.x} ${frame.position.y} ${frame.position.z}`}
-                rotation={`${frame.rotation.x} ${frame.rotation.y} ${frame.rotation.z}`}
-                scale={`${frame.scale.x} ${frame.scale.y} ${frame.scale.z}`}
+                position={frame.pos}
+                rotation={frame.rot || '0 0 0'}
+                scale={frame.scale}
               />
             ))}
 
-            {/* Sistema de Iluminación desde configuración */}
+            {/* Sistema de Iluminación */}
             
             {/* Luz Ambiental */}
-            <Entity 
-              light={`type: ${museumModelsConfig.lights.ambient.type}; color: ${museumModelsConfig.lights.ambient.color}; intensity: ${museumModelsConfig.lights.ambient.intensity}`}
-            />
+            <Entity light="type: ambient; color: #FFF; intensity: 0.6" />
 
             {/* Luces Direccionales */}
-            {museumModelsConfig.lights.directional.map((light) => (
-              <Entity
-                key={light.id}
-                light={`type: ${light.type}; color: ${light.color}; intensity: ${light.intensity}`}
-                position={`${light.position.x} ${light.position.y} ${light.position.z}`}
-              />
-            ))}
+            <Entity light="type: directional; color: #FFF; intensity: 0.5" position="2 20 0" />
+            <Entity light="type: directional; color: #FFF; intensity: 1" position="2 4 -3" />
 
             {/* Luces Puntuales */}
-            {museumModelsConfig.lights.point.map((light) => (
+            {POINT_LIGHTS.map((light) => (
               <a-light
-                key={light.id}
+                key={`point-${light.id}`}
                 type="point"
                 color={light.color}
                 intensity={light.intensity}
-                position={`${light.position.x} ${light.position.y} ${light.position.z}`}
-                distance={light.distance || 0}
+                position={light.pos}
               />
             ))}
 
             {/* Luces Spot */}
-            {museumModelsConfig.lights.spot.map((light) => (
+            {SPOT_LIGHTS.map((light) => (
               <a-light
-                key={light.id}
+                key={`spot-${light.id}`}
                 type="point"
                 color={light.color}
                 intensity={light.intensity}
-                position={`${light.position.x} ${light.position.y} ${light.position.z}`}
+                position={light.pos}
                 distance={light.distance}
               />
             ))}
