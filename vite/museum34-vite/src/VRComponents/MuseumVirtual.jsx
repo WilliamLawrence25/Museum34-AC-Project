@@ -125,84 +125,84 @@ const MuseumVirtual = () => {
 
       const handlePositionUpdate = (event) => {
         const { x, y, z } = event.detail;
-        if (x >= -5 && x <= -3 && z >= -14 && z <= -12) {
-          setButtonText("Abrir modal: Imagen del Cañon del Colca");
+        if (x >= -5.5 && x <= -2.5 && z >= -14.5 && z <= -11.5) {
+          setButtonText("(E) Imagen del Cañon del Colca");
           setIdModal(1);
           setInModel(true);
-        } else if (x >= -2.4 && x <= -0.7 && z >= -14 && z <= -12) {
-          setButtonText("Abrir modal: Imagen de la plaza de armas");
+        } else if (x >= -2.9 && x <= -0.2 && z >= -14.5 && z <= -11.5) {
+          setButtonText("(E) Imagen de la plaza de armas");
           setIdModal(2);
           setInModel(true);
-        } else if (x >= -0.2 && x <= 1.7 && z >= -14 && z <= -12) {
-          setButtonText("Abrir modal: Imagen de la campiña y Misti");
+        } else if (x >= -0.7 && x <= 2.2 && z >= -14.5 && z <= -11.5) {
+          setButtonText("(E) Imagen de la campiña y Misti");
           setIdModal(3);
           setInModel(true);
-        } else if (x >= 1.8 && x <= 3.9 && z >= -14 && z <= -12) {
-          setButtonText("Abrir modal: Imagen alternativa de la plaza");
+        } else if (x >= 1.3 && x <= 4.4 && z >= -14.5 && z <= -11.5) {
+          setButtonText("(E) Imagen alternativa de la plaza");
           setInModel(true);
           setIdModal(4);
-        } else if (x >= 3.6 && x <= 5.5 && z >= 12.4 && z <= 14) {
-          setButtonText("Abrir modal: Imagen del mirador");
+        } else if (x >= 3.1 && x <= 6.0 && z >= 11.9 && z <= 14.5) {
+          setButtonText("(E) Imagen del mirador");
           setIdModal(5);
           setInModel(true);
-        } else if (x >= 1.5 && x <= 3.3 && z >= 12.4 && z <= 14) {
-          setButtonText("Abrir modal: Imagen del volcán Misti");
+        } else if (x >= 1.0 && x <= 3.8 && z >= 11.9 && z <= 14.5) {
+          setButtonText("(E) Imagen del volcán Misti");
           setIdModal(6);
           setInModel(true);
-        } else if (x >= -0.7 && x <= 1.0 && z >= 12.4 && z <= 14) {
-          setButtonText("Abrir modal: Imagen de la catedral");
+        } else if (x >= -1.2 && x <= 1.5 && z >= 11.9 && z <= 14.5) {
+          setButtonText("(E) Imagen de la catedral");
           setIdModal(7);
           setInModel(true);
-        } else if (x >= -3.18 && x <= 0.1 && z >= 12.4 && z <= 14) {
-          setButtonText("Abrir modal: Imagen de la campiña");
+        } else if (x >= -3.68 && x <= 0.6 && z >= 11.9 && z <= 14.5) {
+          setButtonText("(E) Imagen de la campiña");
           setIdModal(8);
           setInModel(true);
-        } else if (x >= -5.8 && x <= -3.5 && z >= 12.4 && z <= 14) {
-          setButtonText("Abrir modal: Imagen de las canteras de sillar");
+        } else if (x >= -6.3 && x <= -3.0 && z >= 11.9 && z <= 14.5) {
+          setButtonText("(E) Imagen de las canteras de sillar");
           setIdModal(9);
           setInModel(true);
-        } else if (x >= 10.6 && x <= 13.4 && z >= 0.5 && z <= 1.75) {
-          setButtonText("Abrir modal: Imagen del rocoto relleno");
+        } else if (x >= 10.1 && x <= 13.9 && z >= 0.0 && z <= 2.25) {
+          setButtonText("(E) Imagen del rocoto relleno");
           setIdModal(10);
           setInModel(true);
-        } else if (x >= -10.87 && x <= -9.2 && z >= 0.5 && z <= 1.75) {
-          setButtonText("Abrir modal: Imagen lateral de las canteras de sillar");
+        } else if (x >= -11.37 && x <= -8.7 && z >= 0.0 && z <= 2.25) {
+          setButtonText("(E) Imagen lateral de las canteras de sillar");
           setIdModal(11);
           setInModel(true);
-        } else if (x >= -14 && x <= -11.5 && z >= 0.5 && z <= 1.75) {
-          setButtonText("Abrir modal: Imagen lateral de la cantera");
+        } else if (x >= -14.5 && x <= -11.0 && z >= 0.0 && z <= 2.25) {
+          setButtonText("(E) Imagen lateral de la cantera");
           setIdModal(12);
           setInModel(true);
-        } else if (x >= 7 && x <= 8 && z >= -6.5 && z <= -3) {
-          setButtonText("Abrir modal: Modelo 3D de la catedral");
+        } else if (x >= 6.5 && x <= 8.5 && z >= -7.0 && z <= -2.5) {
+          setButtonText("(E) Modelo 3D de la catedral");
           setIdModal(13);
           setInModel(true);
-        } else if (x >= 7 && x <= 8 && z >= 2.5 && z <= 5) {
-          setButtonText("Abrir modal: Modelo 3D del águila");
+        } else if (x >= 6.5 && x <= 8.5 && z >= 2.0 && z <= 5.5) {
+          setButtonText("(E) Modelo 3D del águila");
           setIdModal(14);
           setInModel(true);
-        } else if (x >= 7 && x <= 8 && z >= 6 && z <= 8) {
-          setButtonText("Abrir modal: Modelo 3D del burro");
+        } else if (x >= 6.5 && x <= 8.5 && z >= 5.5 && z <= 8.5) {
+          setButtonText("(E) Modelo 3D del burro");
           setIdModal(15);
           setInModel(true);
-        } else if (x >= 7 && x <= 8 && z >= 8.1 && z <= 10.1) {
-          setButtonText("Abrir modal: Modelo 3D de la mujer");
+        } else if (x >= 6.5 && x <= 8.5 && z >= 7.6 && z <= 10.6) {
+          setButtonText("(E) Modelo 3D de la mujer");
           setIdModal(16);
           setInModel(true);
-        } else if (x >= 7 && x <= 8 && z >= 10.5 && z <= 13) {
-          setButtonText("Abrir modal: Modelo 3D del hombre");
+        } else if (x >= 6.5 && x <= 8.5 && z >= 10.0 && z <= 13.5) {
+          setButtonText("(E) Modelo 3D del hombre");
           setIdModal(17);
           setInModel(true);
-        } else if (x >= -8.8 && x <= -7.8 && z >= 9 && z <= 12) {
-          setButtonText("Abrir modal: Modelo 3D del portal");
+        } else if (x >= -9.3 && x <= -7.3 && z >= 8.5 && z <= 12.5) {
+          setButtonText("(E) Modelo 3D del portal");
           setIdModal(18);
           setInModel(true);
-        } else if (x >= -8.8 && x <= -7.8 && z >= -10 && z <= -8) {
-          setButtonText("Abrir modal: Modelo 3D de Furina");
+        } else if (x >= -9.3 && x <= -7.3 && z >= -10.5 && z <= -7.5) {
+          setButtonText("(E) Modelo 3D de Furina");
           setIdModal(19);
           setInModel(true);
-        } else if (x >= -8.8 && x <= -7.8 && z >= -13 && z <= -11) {
-          setButtonText("Abrir modal: Modelo 3D del Misti");
+        } else if (x >= -9.3 && x <= -7.3 && z >= -13.5 && z <= -10.5) {
+          setButtonText("(E) Modelo 3D del Misti");
           setIdModal(20);
           setInModel(true);
         } else {
@@ -330,7 +330,29 @@ const MuseumVirtual = () => {
     clickAudio.volume = volumenNormalizado / 2;
     clickAudio.play().catch((error) => console.error("Error playing click sound:", error));
 
-    setIsModalOpen((prev) => !prev);
+    setIsModalOpen((prev) => {
+      const newState = !prev;
+      
+      if (newState) {
+        // Bloquear movimiento
+        if (playerRef.current) {
+          playerRef.current.setAttribute('wasd-controls', 'enabled: false');
+          playerRef.current.setAttribute('look-controls', 'enabled: false');
+        }
+
+        if (document.pointerLockElement) {
+          document.exitPointerLock();
+        }
+      } else {
+        // Restaurar movimiento y controles
+        if (playerRef.current) {
+          playerRef.current.setAttribute('wasd-controls', `enabled: true; acceleration: ${aceleracion}`);
+          playerRef.current.setAttribute('look-controls', 'enabled: true; pointerLockEnabled: true');
+        }
+      }
+      
+      return newState;
+    });
   };
 
   const [isPerfilOpen, setIsPerfilOpen] = useState(false);
@@ -352,6 +374,17 @@ const MuseumVirtual = () => {
           clickAudio.play().catch((error) =>
             console.error("Error playing click sound:", error)
           );
+          
+          // Bloquear movimiento y liberar el mouse
+          if (playerRef.current) {
+            playerRef.current.setAttribute('wasd-controls', 'enabled: false');
+            playerRef.current.setAttribute('look-controls', 'enabled: false');
+          }
+          // Liberar el pointer lock
+          if (document.pointerLockElement) {
+            document.exitPointerLock();
+          }
+          
           setIsModalOpen(true);
         }
       }
@@ -362,7 +395,7 @@ const MuseumVirtual = () => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [inModel, isModalOpen, volumenNormalizado]);
+  }, [inModel, isModalOpen, volumenNormalizado, aceleracion]);
 
   const brilloCSS = 0.5 + (brillo / 100);
 
@@ -395,7 +428,14 @@ const MuseumVirtual = () => {
         <ModalInformation
           isOpen={isModalOpen}
           id={idModal}
-          onClose={() => setIsModalOpen(false)}
+          onClose={() => {
+            setIsModalOpen(false);
+            // Restaurar movimiento y controles
+            if (playerRef.current) {
+              playerRef.current.setAttribute('wasd-controls', `enabled: true; acceleration: ${aceleracion}`);
+              playerRef.current.setAttribute('look-controls', 'enabled: true; pointerLockEnabled: true');
+            }
+          }}
         />
       )}
 
@@ -433,25 +473,33 @@ const MuseumVirtual = () => {
         <div
           style={{
             position: "absolute",
-            top: "10px",
-            right: "10px",
+            top: "20px",
+            right: "20px",
             zIndex: 1000,
-            backgroundColor: "#fff",
-            padding: "10px",
-            borderRadius: "5px",
-            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
           }}
         >
           <button
             onClick={toggleModal}
             style={{
-              padding: "10px 20px",
+              padding: "12px 24px",
               fontSize: "14px",
-              backgroundColor: isModalOpen ? "#FF5C5C" : "#6CEEB5",
+              fontWeight: "600",
+              backgroundColor: isModalOpen ? "#FF5C5C" : "#141672ff",
               color: "#fff",
               border: "none",
-              borderRadius: "5px",
+              borderRadius: "8px",
               cursor: "pointer",
+              boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.3)",
+              transition: "all 0.3s ease",
+              backdropFilter: "blur(10px)",
+            }}
+            onMouseEnter={(e)  => {
+              e.target.style.transform = "translateY(-2px)";
+              e.target.style.boxShadow = "0px 6px 16px rgba(0, 0, 0, 0.4)";
+            }}
+            onMouseLeave={(e)  => {
+              e.target.style.transform = "translateY(0)";
+              e.target.style.boxShadow = "0px 4px 12px rgba(0, 0, 0, 0.3)";
             }}
           >
             {isModalOpen ? "Cerrar Modal" : buttonText}
