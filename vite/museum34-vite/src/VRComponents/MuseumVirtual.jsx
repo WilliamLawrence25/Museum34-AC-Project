@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Entity, Scene } from "aframe-react";
 import BottomMenu from "./BottomMenu.jsx";
 import stepSound from "./audio/step-sound.ogg";
@@ -15,7 +15,6 @@ import styled from "styled-components";
 
 import AFrameControls from "./AFrameControls.jsx";
 import "aframe";
-import "aframe-physics-system";
 import ModalInformation from "../components/DataModels/ModalInformation.jsx";
 
 import TransitionAnimation from "./TransitionAnimation.jsx";
@@ -35,7 +34,6 @@ const ModalContainer = styled.div`
   padding: 20px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 `;
-
 const CloseButton = styled.button`
   position: absolute;
   top: 15px;
@@ -51,233 +49,22 @@ const CloseButton = styled.button`
     color: #ff3333;
   }
 `;
-
-const MusicButton = styled.button`
-  position: fixed;
-  top: 20px;
-  right: 20px;
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #1e1f29, #3a3b46);
-  border: 2px solid ${props => props.isMuted ? '#ff6666' : '#4CAF50'};
-  color: #fff;
-  font-size: 28px;
-  cursor: pointer;
-  z-index: 9998;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
-`;
-
 const MuseumVirtual = () => {
-  // ========== CONFIGURACIÓN DEL MUSEO ==========
-  
-  // Configuración de zonas de interacción
-  const INTERACTION_ZONES = useMemo(() => [
-    // Imágenes del muro norte
-    { id: 1, name: 'Imagen del Cañon del Colca', bounds: { xMin: -6, xMax: -2, zMin: -15, zMax: -11 } },
-    { id: 2, name: 'Imagen de la plaza de armas', bounds: { xMin: -3, xMax: 0, zMin: -15, zMax: -11 } },
-    { id: 3, name: 'Imagen de la campiña y Misti', bounds: { xMin: -0.5, xMax: 2.5, zMin: -15, zMax: -11 } },
-    { id: 4, name: 'Imagen alternativa de la plaza', bounds: { xMin: 1.5, xMax: 4.5, zMin: -15, zMax: -11 } },
-    // Imágenes del muro sur
-    { id: 5, name: 'Imagen del mirador', bounds: { xMin: 3, xMax: 6.5, zMin: 11, zMax: 15 } },
-    { id: 6, name: 'Imagen del volcán Misti', bounds: { xMin: 0.5, xMax: 4, zMin: 11, zMax: 15 } },
-    { id: 7, name: 'Imagen de la catedral', bounds: { xMin: -1.5, xMax: 1.5, zMin: 11, zMax: 15 } },
-    { id: 8, name: 'Imagen de la campiña', bounds: { xMin: -4, xMax: 1, zMin: 11, zMax: 15 } },
-    { id: 9, name: 'Imagen de las canteras de sillar', bounds: { xMin: -6.5, xMax: -3, zMin: 11, zMax: 15 } },
-    // Imágenes del muro este
-    { id: 10, name: 'Imagen del rocoto relleno', bounds: { xMin: 9.5, xMax: 14, zMin: -0.5, zMax: 2.5 } },
-    // Imágenes del muro oeste
-    { id: 11, name: 'Imagen lateral de las canteras de sillar', bounds: { xMin: -11.5, xMax: -8.5, zMin: -0.5, zMax: 2.5 } },
-    { id: 12, name: 'Imagen lateral de la cantera', bounds: { xMin: -15, xMax: -10.5, zMin: -0.5, zMax: 2.5 } },
-    // Modelos 3D del lado este
-    { id: 13, name: 'Modelo 3D de la catedral', bounds: { xMin: 6, xMax: 11, zMin: -7.5, zMax: -2 } },
-    { id: 14, name: 'Modelo 3D del águila', bounds: { xMin: 6, xMax: 11, zMin: 1.5, zMax: 6 } },
-    { id: 15, name: 'Modelo 3D del burro', bounds: { xMin: 6, xMax: 11, zMin: 5, zMax: 9 } },
-    { id: 16, name: 'Modelo 3D de la mujer', bounds: { xMin: 6, xMax: 11, zMin: 7, zMax: 11 } },
-    { id: 17, name: 'Modelo 3D del hombre', bounds: { xMin: 6, xMax: 11, zMin: 9.5, zMax: 13.5 } },
-    // Modelos 3D del lado oeste
-    { id: 18, name: 'Modelo 3D del portal', bounds: { xMin: -11, xMax: -6.5, zMin: 8, zMax: 13 } },
-    { id: 19, name: 'Modelo 3D de Furina', bounds: { xMin: -11, xMax: -6.5, zMin: -11, zMax: -7 } },
-    { id: 20, name: 'Modelo 3D del Misti', bounds: { xMin: -11, xMax: -6.5, zMin: -14, zMax: -10 } },
-  ], []);
-
-  // Configuración de modelos 3D
-  const MODELS_3D = useMemo(() => [
-    { id: 'furina', model: '#furina', pos: '-10 0.7 -9', rot: '0 90 0', scale: '1.3 1.3 1.3' },
-    { id: 'volcan', model: '#volcan', pos: '-10.2 0.6 -12', rot: '0 0 0', scale: '0.015 0.015 0.015' },
-    { id: 'catedral', model: '#catedral', pos: '10 1.8 -5', rot: '0 180 0', scale: '3 3 3' },
-    { id: 'donkey_sillar', model: '#donkey_sillar_polycam', pos: '9.2 0.99 7', rot: '0 0 0', scale: '2 2 2' },
-    { id: 'eagle_sillar', model: '#eagle_sillar_polycam', pos: '9.7 1.2 4', rot: '0 0 0', scale: '2 2 2' },
-    { id: 'barroco_andino', model: '#barroco_andino', pos: '-9.7 1.7 10', rot: '0 270 0', scale: '0.6 0.6 0.6' },
-    { id: 'sillar_plycam', model: '#sillar_plycam_1', pos: '9.5 1.6 11', rot: '0 180 0', scale: '4 4 4' },
-  ], []);
-
-  // Configuración de pedestales
-  const PODIUMS = useMemo(() => [
-    { id: 1, pos: '13 0 12.1' }, { id: 2, pos: '10 0 12.1' },
-    { id: 3, pos: '-13 0 12.1' }, { id: 4, pos: '-10 0 12.1' },
-    { id: 5, pos: '-5 0 6' }, { id: 6, pos: '-5 0 10' },
-    { id: 7, pos: '0 0 6' }, { id: 8, pos: '0 0 10' },
-    { id: 9, pos: '5 0 6' }, { id: 10, pos: '5 0 10' },
-  ], []);
-
-  // Configuración de lámparas
-  const LAMPS = useMemo(() => [
-    { id: 1, pos: '12 0 -12' }, { id: 2, pos: '0 0 0' },
-    { id: 3, pos: '-12.7 0 -12' }, { id: 4, pos: '-10 0 -12' },
-  ], []);
-
-  // Configuración de cuadros
-  const FRAMES = useMemo(() => [
-    { id: 'sillar3', material: '#sillarPhoto3', pos: '-7.2 0 0', scale: '1 1 1' },
-    { id: 'sillar2', material: '#sillarPhoto2', pos: '-6.2 -0.2 0', scale: '0.7 1.1 1' },
-    { id: 'rocoto', material: '#rocotoPhoto', pos: '18.8 -0.2 0', scale: '1.21 1.1 1' },
-    { id: 'sillar', material: '#sillarPhoto', pos: '1 0 12', scale: '1 1 1' },
-    { id: 'volcan2', material: '#volcanPhoto2', pos: '3.3 0 12', scale: '1 1 1' },
-    { id: 'catedral', material: '#catedralPhoto', pos: '5.6 0 12', scale: '1 1 1' },
-    { id: 'volcan', material: '#volcanPhoto', pos: '7.9 0 12', scale: '1 1 1' },
-    { id: 'mirador', material: '#miradorPhoto', pos: '10.2 0 12', scale: '1 1 1' },
-    { id: 'moonlight', material: '#moonlight-texture', pos: '-7.2 0 -12', rot: '0 180 0', scale: '1 1 1' },
-    { id: 'valle', material: '#vallePhoto', pos: '-4.9 0 -12', rot: '0 180 0', scale: '1 1 1' },
-    { id: 'valle2', material: '#vallePhoto2', pos: '-9.5 0 -12', rot: '0 180 0', scale: '1 1 1' },
-    { id: 'plaza2', material: '#plazaPhoto2', pos: '-2.6 0 -12', rot: '0 180 0', scale: '1 1 1' },
-  ], []);
-
-  // Configuración de luces puntuales
-  const POINT_LIGHTS = useMemo(() => [
-    { id: 1, color: '#FFF', intensity: 1.2, pos: '-10 3.5 -12' },
-    { id: 2, color: '#FFF', intensity: 1.2, pos: '10 3.5 -12' },
-    { id: 3, color: '#FFF', intensity: 1.0, pos: '0 3.5 12' },
-    { id: 4, color: '#FFF', intensity: 1.0, pos: '-10 3.5 10' },
-    { id: 5, color: '#FFF', intensity: 1.0, pos: '10 3.5 10' },
-    { id: 6, color: '#FFF', intensity: 0.8, pos: '-14 3 0' },
-    { id: 7, color: '#FFF', intensity: 0.8, pos: '14 3 0' },
-    { id: 8, color: '#FFF', intensity: 1.5, pos: '10 4 -5' },
-    { id: 9, color: '#FFF', intensity: 1.5, pos: '-10 4 10' },
-    { id: 10, color: '#FFF', intensity: 1.2, pos: '-10 3 -9' },
-    { id: 11, color: '#FFF', intensity: 1.0, pos: '0 5 0' },
-    { id: 12, color: '#FFF', intensity: 0.7, pos: '12 2.5 -10' },
-    { id: 13, color: '#FFF', intensity: 0.7, pos: '-12 2.5 -10' },
-    { id: 14, color: '#FFF', intensity: 0.7, pos: '12 2.5 10' },
-    { id: 15, color: '#FFF', intensity: 0.7, pos: '-12 2.5 10' },
-  ], []);
-
-  // Configuración de luces spotlight
-  const SPOT_LIGHTS = useMemo(() => [
-    { id: 1, color: '#FFF', intensity: 2, pos: '-4 4 -12', distance: 8 },
-    { id: 2, color: '#FFF', intensity: 2, pos: '4 4 -12', distance: 8 },
-    { id: 3, color: '#FFF', intensity: 2, pos: '-4 4 12', distance: 8 },
-    { id: 4, color: '#FFF', intensity: 2, pos: '4 4 12', distance: 8 },
-  ], []);
-
-  // ========== ESTADOS ==========
-  
-  // Estados principales
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false); // Estado para controlar si se cargan los recursos
+  const [isModalOpen, setIsModalOpen] = useState(false); // Estado del modal
   const [contentDisplay, setContentDisplay] = useState("none");
-  const [buttonText, setButtonText] = useState("Abrir Modal");
-  const [idModal, setIdModal] = useState(0);
+  const [buttonText, setButtonText] = useState("Abrir Modal"); // Texto inicial
+  const [idModal, setIdModal] = useState(0); // Texto inicial
   const [museumTime, setMuseumTime] = useState(0);
-  const [inModel, setInModel] = useState(false);
 
-  // Configuración del usuario
   const [brillo, setBrillo] = useState(50);
   const [volumen, setVolumen] = useState(50);
   const [movimiento, setMovimiento] = useState(50);
   const [sensibilidad, setSensibilidad] = useState(50);
+
   const [userID, setUserID] = useState(null);
   const [conID, setConID] = useState(null);
-  const [isMuted, setIsMuted] = useState(false);
 
-  // Estados de secciones
-  const [isPerfilOpen, setIsPerfilOpen] = useState(false);
-  const [isConfigOpen, setIsConfigOpen] = useState(false);
-  const [isInfoOpen, setIsInfoOpen] = useState(false);
-
-  // Refs
-  const playerRef = useRef(null);
-  const audioRef = useRef(null);
-
-  // Variables calculadas
-  const volumenNormalizado = volumen / 100;
-  const aceleracion = 10 + (movimiento / 100) * 90;
-  const brilloCSS = 0.5 + (brillo / 100);
-
-  // ========== HELPERS ==========
-
-  const playClickSound = () => {
-    const clickAudio = new Audio(clickSound);
-    clickAudio.volume = volumenNormalizado / 2;
-    clickAudio.play().catch((error) => console.error("Error playing click sound:", error));
-  };
-
-  const closeAllSections = () => {
-    setIsPerfilOpen(false);
-    setIsConfigOpen(false);
-    setIsInfoOpen(false);
-  };
-
-  const checkInteractionZone = (x, z) => {
-    const zone = INTERACTION_ZONES.find(zone => 
-      x >= zone.bounds.xMin && x <= zone.bounds.xMax &&
-      z >= zone.bounds.zMin && z <= zone.bounds.zMax
-    );
-    
-    if (zone) {
-      setButtonText(`Abrir ${zone.name}`);
-      setIdModal(zone.id);
-      setInModel(true);
-    } else {
-      setIdModal(0);
-      setInModel(false);
-    }
-  };
-
-  const toggleModal = () => {
-    playClickSound();
-    setIsModalOpen((prev) => !prev);
-  };
-
-  const toggleMute = () => {
-    setIsMuted((prev) => !prev);
-  };
-
-  const handleConfigChange = (newConfig) => {
-    if (newConfig.brillo !== undefined) setBrillo(newConfig.brillo);
-    if (newConfig.volumen !== undefined) setVolumen(newConfig.volumen);
-    if (newConfig.velocidad !== undefined) setMovimiento(newConfig.velocidad);
-    if (newConfig.sensibilidad !== undefined) setSensibilidad(newConfig.sensibilidad);
-  };
-
-  const handleLoadScene = () => {
-    playClickSound();
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsLoaded(true);
-      setContentDisplay("block");
-    }, 3500);
-  };
-
-  // ========== EFFECTS ==========
-
-  // Cargar configuración del usuario
   useEffect(() => {
     const storedUserID = localStorage.getItem("loggedIn");
     if (storedUserID) {
@@ -285,9 +72,9 @@ const MuseumVirtual = () => {
       const fetchUsuario = async () => {
         try {
           const response = await api.get(`/usuarios/${storedUserID}`);
+          console.log("la configuracion es: ", response.data.configuracion);
           const configID = response.data.configuracion;
           setConID(configID);
-          
           if (configID === null) {
             setBrillo(50);
             setVolumen(50);
@@ -309,29 +96,17 @@ const MuseumVirtual = () => {
     }
   }, []);
 
-  // Actualizar aceleración del jugador
+  const aceleracion = 10 + (movimiento / 100) * 90;
+
   useEffect(() => {
     if (playerRef.current) {
       playerRef.current.setAttribute("wasd-controls", `acceleration: ${aceleracion}`);
     }
   }, [aceleracion]);
 
-  // Controlar bloqueo de controles cuando hay modales abiertos
-  useEffect(() => {
-    if (playerRef.current) {
-      const playerEl = playerRef.current;
-      if (isModalOpen || isPerfilOpen || isConfigOpen || isInfoOpen) {
-        playerEl.setAttribute("wasd-controls", "enabled: false");
-        playerEl.setAttribute("look-controls", "enabled: false");
-        document.exitPointerLock();
-      } else {
-        playerEl.setAttribute("wasd-controls", `enabled: true; acceleration: ${aceleracion}`);
-        playerEl.setAttribute("look-controls", "enabled: true; pointerLockEnabled: true");
-      }
-    }
-  }, [isModalOpen, isPerfilOpen, isConfigOpen, isInfoOpen, aceleracion]);
+  const playerRef = useRef(null);
+  const [inModel, setInModel] = useState(false);
 
-  // Timer del museo
   useEffect(() => {
     const timer = setInterval(() => {
       setMuseumTime((prevTime) => prevTime + 1);
@@ -340,7 +115,6 @@ const MuseumVirtual = () => {
     return () => clearInterval(timer);
   }, []);
 
-  // Detección de posición del jugador
   useEffect(() => {
     const waitForPlayerRef = async () => {
       while (!playerRef.current) {
@@ -350,8 +124,91 @@ const MuseumVirtual = () => {
       const playerEl = playerRef.current;
 
       const handlePositionUpdate = (event) => {
-        const { x, z } = event.detail;
-        checkInteractionZone(x, z);
+        const { x, y, z } = event.detail;
+        if (x >= -5 && x <= -3 && z >= -14 && z <= -12) {
+          setButtonText("Abrir modal: Imagen del Cañon del Colca");
+          setIdModal(1);
+          setInModel(true);
+        } else if (x >= -2.4 && x <= -0.7 && z >= -14 && z <= -12) {
+          setButtonText("Abrir modal: Imagen de la plaza de armas");
+          setIdModal(2);
+          setInModel(true);
+        } else if (x >= -0.2 && x <= 1.7 && z >= -14 && z <= -12) {
+          setButtonText("Abrir modal: Imagen de la campiña y Misti");
+          setIdModal(3);
+          setInModel(true);
+        } else if (x >= 1.8 && x <= 3.9 && z >= -14 && z <= -12) {
+          setButtonText("Abrir modal: Imagen alternativa de la plaza");
+          setInModel(true);
+          setIdModal(4);
+        } else if (x >= 3.6 && x <= 5.5 && z >= 12.4 && z <= 14) {
+          setButtonText("Abrir modal: Imagen del mirador");
+          setIdModal(5);
+          setInModel(true);
+        } else if (x >= 1.5 && x <= 3.3 && z >= 12.4 && z <= 14) {
+          setButtonText("Abrir modal: Imagen del volcán Misti");
+          setIdModal(6);
+          setInModel(true);
+        } else if (x >= -0.7 && x <= 1.0 && z >= 12.4 && z <= 14) {
+          setButtonText("Abrir modal: Imagen de la catedral");
+          setIdModal(7);
+          setInModel(true);
+        } else if (x >= -3.18 && x <= 0.1 && z >= 12.4 && z <= 14) {
+          setButtonText("Abrir modal: Imagen de la campiña");
+          setIdModal(8);
+          setInModel(true);
+        } else if (x >= -5.8 && x <= -3.5 && z >= 12.4 && z <= 14) {
+          setButtonText("Abrir modal: Imagen de las canteras de sillar");
+          setIdModal(9);
+          setInModel(true);
+        } else if (x >= 10.6 && x <= 13.4 && z >= 0.5 && z <= 1.75) {
+          setButtonText("Abrir modal: Imagen del rocoto relleno");
+          setIdModal(10);
+          setInModel(true);
+        } else if (x >= -10.87 && x <= -9.2 && z >= 0.5 && z <= 1.75) {
+          setButtonText("Abrir modal: Imagen lateral de las canteras de sillar");
+          setIdModal(11);
+          setInModel(true);
+        } else if (x >= -14 && x <= -11.5 && z >= 0.5 && z <= 1.75) {
+          setButtonText("Abrir modal: Imagen lateral de la cantera");
+          setIdModal(12);
+          setInModel(true);
+        } else if (x >= 7 && x <= 8 && z >= -6.5 && z <= -3) {
+          setButtonText("Abrir modal: Modelo 3D de la catedral");
+          setIdModal(13);
+          setInModel(true);
+        } else if (x >= 7 && x <= 8 && z >= 2.5 && z <= 5) {
+          setButtonText("Abrir modal: Modelo 3D del águila");
+          setIdModal(14);
+          setInModel(true);
+        } else if (x >= 7 && x <= 8 && z >= 6 && z <= 8) {
+          setButtonText("Abrir modal: Modelo 3D del burro");
+          setIdModal(15);
+          setInModel(true);
+        } else if (x >= 7 && x <= 8 && z >= 8.1 && z <= 10.1) {
+          setButtonText("Abrir modal: Modelo 3D de la mujer");
+          setIdModal(16);
+          setInModel(true);
+        } else if (x >= 7 && x <= 8 && z >= 10.5 && z <= 13) {
+          setButtonText("Abrir modal: Modelo 3D del hombre");
+          setIdModal(17);
+          setInModel(true);
+        } else if (x >= -8.8 && x <= -7.8 && z >= 9 && z <= 12) {
+          setButtonText("Abrir modal: Modelo 3D del portal");
+          setIdModal(18);
+          setInModel(true);
+        } else if (x >= -8.8 && x <= -7.8 && z >= -10 && z <= -8) {
+          setButtonText("Abrir modal: Modelo 3D de Furina");
+          setIdModal(19);
+          setInModel(true);
+        } else if (x >= -8.8 && x <= -7.8 && z >= -13 && z <= -11) {
+          setButtonText("Abrir modal: Modelo 3D del Misti");
+          setIdModal(20);
+          setInModel(true);
+        } else {
+          setIdModal(0);
+          setInModel(false);
+        }
       };
 
       const attachListener = () => {
@@ -373,7 +230,8 @@ const MuseumVirtual = () => {
     waitForPlayerRef();
   }, []);
 
-  // Sistema de sonido de pasos
+  const volumenNormalizado = volumen / 100;
+
   useEffect(() => {
     let isMoving = false;
     const audio = new Audio(stepSound);
@@ -449,69 +307,88 @@ const MuseumVirtual = () => {
       window.removeEventListener("keyup", handleKeyUp);
       clearTimeout(jumpTimeout);
     };
-  }, [volumenNormalizado]);
+  }, []);
 
-  // Tecla E para abrir modal
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLoadScene = () => {
+    const clickAudio = new Audio(clickSound);
+    clickAudio.volume = volumenNormalizado / 2;
+    clickAudio.play().catch((error) => console.error("Error playing click sound:", error));
+    setIsLoading(true);
+
+    setTimeout(() => {
+      setIsLoading(false);
+      setIsLoaded(true);
+
+      setContentDisplay("block");
+    }, 3500);
+  };
+
+  const toggleModal = () => {
+    const clickAudio = new Audio(clickSound);
+    clickAudio.volume = volumenNormalizado / 2;
+    clickAudio.play().catch((error) => console.error("Error playing click sound:", error));
+
+    setIsModalOpen((prev) => !prev);
+  };
+
+  const [isPerfilOpen, setIsPerfilOpen] = useState(false);
+  const [isConfigOpen, setIsConfigOpen] = useState(false);
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
+
+  const closeAllSections = () => {
+    setIsPerfilOpen(false);
+    setIsConfigOpen(false);
+    setIsInfoOpen(false);
+  };
+
   useEffect(() => {
     const handleKeyDown = (event) => {
-      if (inModel && (event.key === 'e' || event.key === 'E') && !isModalOpen) {
-        playClickSound();
-        setIsModalOpen(true);
+      if (inModel && (event.key === 'e' || event.key === 'E')) {
+        if (!isModalOpen) {
+          const clickAudio = new Audio(clickSound);
+          clickAudio.volume = volumenNormalizado / 2;
+          clickAudio.play().catch((error) =>
+            console.error("Error playing click sound:", error)
+          );
+          setIsModalOpen(true);
+        }
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [inModel, isModalOpen, volumenNormalizado]);
 
-  // Animación CSS
-  useEffect(() => {
-    const style = document.createElement('style');
-    style.innerHTML = `
-      @keyframes slideUp {
-        from {
-          opacity: 0;
-          transform: translateX(-50%) translateY(20px);
-        }
-        to {
-          opacity: 1;
-          transform: translateX(-50%) translateY(0);
-        }
-      }
-    `;
-    document.head.appendChild(style);
-    return () => document.head.removeChild(style);
-  }, []);
+  const brilloCSS = 0.5 + (brillo / 100);
 
-  // ========== RENDER ==========
+  const handleConfigChange = (newConfig) => {
+    if (newConfig.brillo !== undefined) setBrillo(newConfig.brillo);
+    if (newConfig.volumen !== undefined) setVolumen(newConfig.volumen);
+    if (newConfig.velocidad !== undefined) setMovimiento(newConfig.velocidad);
+    if (newConfig.sensibilidad !== undefined) setSensibilidad(newConfig.sensibilidad);
+  };
 
   return (
-    <div style={{ height: "100vh", width: "100vw", overflow: "hidden", position: "relative" }}>
+    <div style={{ height: "100vh", width: "100vw", overflow: "hidden", filter: `brightness(${brilloCSS})` }}>
       <AFrameControls />
       <HelpBox />
 
-      {/* Botón de música flotante */}
       {isLoaded && (
-        <MusicButton 
-          onClick={toggleMute} 
-          isMuted={isMuted}
-          title={isMuted ? "Activar música" : "Silenciar música"}
-        >
-          {isMuted ? "🔇" : "🔊"}
-        </MusicButton>
-      )}
-
-      {isLoaded && (
-        <BottomMenu
-          setActiveSection={(section) => {
-            closeAllSections();
-            if (section === "perfil") setIsPerfilOpen(true);
-            if (section === "config") setIsConfigOpen(true);
-            if (section === "info") setIsInfoOpen(true);
-          }}
-          isMuted={isMuted}
-          toggleMute={toggleMute}
-        />
+        <div>
+          <BottomMenu
+            setActiveSection={(section) => {
+              closeAllSections();
+              if (section === "perfil") setIsPerfilOpen(true);
+              if (section === "config") setIsConfigOpen(true);
+              if (section === "info") setIsInfoOpen(true);
+            }}
+          />
+        </div>
       )}
 
       {isModalOpen && (
@@ -555,56 +432,30 @@ const MuseumVirtual = () => {
       {isLoaded && inModel && (
         <div
           style={{
-            position: "fixed",
-            bottom: "120px",
-            left: "50%",
-            transform: "translateX(-50%)",
+            position: "absolute",
+            top: "10px",
+            right: "10px",
             zIndex: 1000,
-            background: "rgba(30, 31, 41, 0.95)",
-            padding: "16px 24px",
-            borderRadius: "12px",
-            boxShadow: "0 4px 15px rgba(0, 0, 0, 0.5)",
-            border: "2px solid #6CEEB5",
-            backdropFilter: "blur(10px)",
-            animation: "slideUp 0.3s ease-out",
+            backgroundColor: "#fff",
+            padding: "10px",
+            borderRadius: "5px",
+            boxShadow: "0px 4px 6px rgba(0, 0, 0, 0.1)",
           }}
         >
           <button
             onClick={toggleModal}
             style={{
-              padding: "12px 24px",
-              fontSize: "16px",
-              fontWeight: "600",
-              background: isModalOpen 
-                ? "#FF5C5C" 
-                : "#6CEEB5",
+              padding: "10px 20px",
+              fontSize: "14px",
+              backgroundColor: isModalOpen ? "#FF5C5C" : "#6CEEB5",
               color: "#fff",
               border: "none",
-              borderRadius: "8px",
+              borderRadius: "5px",
               cursor: "pointer",
-              transition: "all 0.2s ease",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.3)",
-              width: "100%",
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = "translateY(-2px)";
-              e.target.style.boxShadow = "0 4px 12px rgba(0, 0, 0, 0.4)";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = "translateY(0)";
-              e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.3)";
             }}
           >
-            {isModalOpen ? "Cerrar" : buttonText}
+            {isModalOpen ? "Cerrar Modal" : buttonText}
           </button>
-          <div style={{
-            marginTop: "8px",
-            textAlign: "center",
-            fontSize: "12px",
-            color: "rgba(255, 255, 255, 0.7)",
-          }}>
-            Presiona <strong style={{ color: "#6CEEB5" }}>E</strong> para {isModalOpen ? "cerrar" : "abrir"}
-          </div>
         </div>
       )}
 
@@ -638,18 +489,17 @@ const MuseumVirtual = () => {
         </div>
       )}
 
-      {isLoading && <TransitionAnimation />}
+      {isLoading && <TransitionAnimation></TransitionAnimation>}
 
       {isLoaded && (
-        <div style={{ filter: `brightness(${brilloCSS})`, height: "100%", width: "100%" }}>
-          <Scene style={{ display: contentDisplay }} physics="driver: local; gravity: 0 0 0">
+        <div>
+          <Scene style={{ display: contentDisplay }}>
             <a-assets>
               <a-mixin id="checkpoint"></a-mixin>
               <a-mixin id="checkpoint-hovered" color="#6CEEB5"></a-mixin>
 
               <img id="sky_sphere-texture" src={models.sky_sphere}></img>
 
-              {/* Assets de modelos 3D */}
               <a-asset-item id="furina" src={models.furina}></a-asset-item>
               <a-asset-item id="volcan" src={models.volcan}></a-asset-item>
               <a-asset-item id="catedral" src={models.catedral}></a-asset-item>
@@ -658,9 +508,13 @@ const MuseumVirtual = () => {
               <a-asset-item id="barroco_andino" src={models.barroco_andino}></a-asset-item>
               <a-asset-item id="sillar_plycam_1" src={models.sillar_plycam_1}></a-asset-item>
 
-              {/* Assets de texturas */}
+              <a-asset-item id="podiums-obj" src={models.podiumsModel}></a-asset-item>
               <img id="podiums-texture" src={models.podiumsTexture}></img>
+
+              <a-asset-item id="lamps-obj" src={models.lampsModel}></a-asset-item>
               <img id="lamps-texture" src={models.lampsTexture}></img>
+
+              <a-asset-item id="recuadro-obj" src={models.recuadroModel}></a-asset-item>
               <img id="moonlight-texture" src={models.moonlightTexture}></img>
               <img id="catedralPhoto" src={models.catedralPhoto}></img>
               <img id="volcanPhoto" src={models.volcanPhoto}></img>
@@ -675,17 +529,12 @@ const MuseumVirtual = () => {
               <img id="vallePhoto" src={models.vallePhoto}></img>
               <img id="vallePhoto2" src={models.vallePhoto2}></img>
 
-              {/* Assets de objetos */}
-              <a-asset-item id="podiums-obj" src={models.podiumsModel}></a-asset-item>
-              <a-asset-item id="lamps-obj" src={models.lampsModel}></a-asset-item>
-              <a-asset-item id="recuadro-obj" src={models.recuadroModel}></a-asset-item>
-
               <a-sound
                 src={audio1}
                 autoplay="true"
                 loop="true"
                 position="1 1 0"
-                volume={isMuted ? 0 : volumenNormalizado}
+                volume={volumenNormalizado}
               ></a-sound>
 
               <a-asset-item id="floor-obj" src={models.floor}></a-asset-item>
@@ -696,105 +545,72 @@ const MuseumVirtual = () => {
 
             <a-sky src="#sky_sphere-texture"></a-sky>
 
-            {/* Museo principal SIN colisión */}
             <Entity
               gltf-model="#main_museum"
-              position="0 0 0"
+              position="00 0 0"
               rotation="0 0 0"
               scale="1 1 1"
+              static-body
             ></Entity>
 
-            {/* Modelos 3D CON colisión */}
-            {MODELS_3D.map((model) => (
-              <Entity
-                key={model.id}
-                gltf-model={model.model}
-                position={model.pos}
-                rotation={model.rot}
-                scale={model.scale}
-                static-body="shape: box"
-              />
-            ))}
+            <Entity gltf-model="#furina" position="-10 0.7 -9" rotation="0 90 0" scale="1.3 1.3 1.3" static-body></Entity>
+            <Entity gltf-model="#volcan" position="-10.2 0.6 -12" rotation="0 0 0" scale="0.015 0.015 0.015" static-body></Entity>
+            <Entity gltf-model="#catedral" position="10 1.8 -5" rotation="0 180 0" scale="3 3 3" static-body></Entity>
+            <Entity gltf-model="#donkey_sillar_polycam" position="9.2 0.99 7" rotation="0 0 0" scale="2 2 2" static-body></Entity>
+            <Entity gltf-model="#eagle_sillar_polycam" position="9.7 1.2 4" rotation="0 0 0" scale="2 2 2" static-body></Entity>
+            <Entity gltf-model="#barroco_andino" position="-9.7 1.7 10" rotation="0 270 0" scale="0.6 0.6 0.6" static-body></Entity>
+            <Entity gltf-model="#sillar_plycam_1" position="9.5 1.6 11" rotation="0 180 0" scale="4 4 4" static-body></Entity>
 
-            {/* Pedestales CON colisión */}
-            {PODIUMS.map((podium) => (
-              <Entity
-                key={`podium-${podium.id}`}
-                obj-model="obj: #podiums-obj"
-                material="src: #podiums-texture"
-                position={podium.pos}
-                rotation="0 0 0"
-                static-body="shape: box"
-              />
-            ))}
+            <Entity obj-model="obj: #podiums-obj" material="src: #podiums-texture" position="13 0 12.1" rotation="0 0 0" static-body></Entity>
+            <Entity obj-model="obj: #podiums-obj" material="src: #podiums-texture" position="10 0 12.1" rotation="0 0 0" static-body></Entity>
+            <Entity obj-model="obj: #podiums-obj" material="src: #podiums-texture" position="-13 0 12.1" rotation="0 0 0" static-body></Entity>
+            <Entity obj-model="obj: #podiums-obj" material="src: #podiums-texture" position="-10 0 12.1" rotation="0 0 0" static-body></Entity>
+            <Entity obj-model="obj: #podiums-obj" material="src: #podiums-texture" position="-5 0 6" rotation="0 0 0" static-body></Entity>
+            <Entity obj-model="obj: #podiums-obj" material="src: #podiums-texture" position="-5 0 10" rotation="0 0 0" static-body></Entity>
+            <Entity obj-model="obj: #podiums-obj" material="src: #podiums-texture" position="0 0 6" rotation="0 0 0" static-body></Entity>
+            <Entity obj-model="obj: #podiums-obj" material="src: #podiums-texture" position="0 0 10" rotation="0 0 0" static-body></Entity>
+            <Entity obj-model="obj: #podiums-obj" material="src: #podiums-texture" position="5 0 6" rotation="0 0 0" static-body></Entity>
+            <Entity obj-model="obj: #podiums-obj" material="src: #podiums-texture" position="5 0 10" rotation="0 0 0" static-body></Entity>
 
-            {/* Lámparas decorativas */}
-            {LAMPS.map((lamp) => (
-              <Entity
-                key={`lamp-${lamp.id}`}
-                obj-model="obj: #lamps-obj"
-                material="src: #lamps-texture"
-                position={lamp.pos}
-                rotation="0 0 0"
-                scale="1 1 1"
-              />
-            ))}
+            <Entity obj-model="obj: #lamps-obj" material="src: #lamps-texture" position="12 0 -12" rotation="0 0 0" scale="1 1 1" static-body></Entity>
+            <Entity obj-model="obj: #lamps-obj" material="src: #lamps-texture" position="0 0 0" rotation="0 0 0" scale="1 1 1" static-body></Entity>
+            <Entity obj-model="obj: #lamps-obj" material="src: #lamps-texture" position="-12.7 0 -12" rotation="0 0 0" scale="1 1 1" static-body></Entity>
+            <Entity obj-model="obj: #lamps-obj" material="src: #lamps-texture" position="-10 0 -12" rotation="0 0 0" scale="1 1 1" static-body></Entity>
 
-            {/* Cuadros en las paredes */}
-            {FRAMES.map((frame) => (
-              <Entity
-                key={`frame-${frame.id}`}
-                obj-model="obj: #recuadro-obj"
-                material={`src: ${frame.material}`}
-                position={frame.pos}
-                rotation={frame.rot || '0 0 0'}
-                scale={frame.scale}
-              />
-            ))}
+            <Entity obj-model="obj: #recuadro-obj" material="src: #sillarPhoto3" position="-7.2 0 0" rotation="0 0 0" scale="1 1 1" static-body></Entity>
+            <Entity obj-model="obj: #recuadro-obj" material="src: #sillarPhoto2" position="-6.2 -0.2  0" rotation="0 0 0" scale="0.7 1.1 1" static-body></Entity>
+            <Entity obj-model="obj: #recuadro-obj" material="src: #rocotoPhoto" position="18.8 -0.2 0" rotation="0 0 0" scale="1.21 1.1 1" static-body></Entity>
+            <Entity obj-model="obj: #recuadro-obj" material="src: #sillarPhoto" position="1 0 12" rotation="0 0 0" scale="1 1 1" static-body></Entity>
+            <Entity obj-model="obj: #recuadro-obj" material="src: #volcanPhoto2" position="3.3 0 12" rotation="0 0 0" scale="1 1 1" static-body></Entity>
+            <Entity obj-model="obj: #recuadro-obj" material="src: #catedralPhoto" position="5.6 0 12" rotation="0 0 0" scale="1 1 1" static-body></Entity>
+            <Entity obj-model="obj: #recuadro-obj" material="src: #volcanPhoto" position="7.9 0 12" rotation="0 0 0" scale="1 1 1" static-body></Entity>
+            <Entity obj-model="obj: #recuadro-obj" material="src: #miradorPhoto" position="10.2 0 12" rotation="0 0 0" scale="1 1 1" static-body></Entity>
 
-            {/* Sistema de Iluminación */}
-            
-            {/* Luz Ambiental */}
-            <Entity light="type: ambient; color: #FFF; intensity: 0.6" />
+            <Entity obj-model="obj: #recuadro-obj" material="src: #moonlight-texture" position="-7.2 0 -12" rotation="0 180 0" scale="1 1 1" static-body></Entity>
+            <Entity obj-model="obj: #recuadro-obj" material="src: #vallePhoto" position="-4.9 0 -12" rotation="0 180 0" scale="1 1 1" static-body></Entity>
+            <Entity obj-model="obj: #recuadro-obj" material="src: #vallePhoto2" position="-9.5 0 -12" rotation="0 180 0" scale="1 1 1" static-body></Entity>
+            <Entity obj-model="obj: #recuadro-obj" material="src: #plazaPhoto2" position="-2.6 0 -12" rotation="0 180 0" scale="1 1 1" static-body></Entity>
 
-            {/* Luces Direccionales */}
-            <Entity light="type: directional; color: #FFF; intensity: 0.5" position="2 20 0" />
-            <Entity light="type: directional; color: #FFF; intensity: 1" position="2 4 -3" />
+            <Entity light="type: directional; color: #FFF; intensity: 0.5" position="2 20 0"></Entity>
+            <Entity light="type: ambient; color: #FFF"></Entity>
 
-            {/* Luces Puntuales */}
-            {POINT_LIGHTS.map((light) => (
-              <a-light
-                key={`point-${light.id}`}
-                type="point"
-                color={light.color}
-                intensity={light.intensity}
-                position={light.pos}
-              />
-            ))}
+            <a-light
+              type="directional"
+              position="2 4 -3"
+              color="#FFF"
+              intensity="1"
+            ></a-light>
 
-            {/* Luces Spot */}
-            {SPOT_LIGHTS.map((light) => (
-              <a-light
-                key={`spot-${light.id}`}
-                type="point"
-                color={light.color}
-                intensity={light.intensity}
-                position={light.pos}
-                distance={light.distance}
-              />
-            ))}
-
-            {/* Jugador con física kinematic */}
             <a-entity
               id="player"
               ref={playerRef}
               camera={`fov: ${sensibilidad}`}
               look-controls="pointerLockEnabled: true;"
-              wasd-controls={`acceleration: ${aceleracion}`}
+              wasd-controls="acceleration: 35"
               run-controls={`normalSpeed: ${aceleracion}; runSpeed: ${aceleracion * 1.5}`}
               jump-controls
               position="0 1.6 0"
-              kinematic-body="radius: 0.4"
+              dynamic-body
               log-position
             ></a-entity>
           </Scene>
