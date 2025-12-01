@@ -541,7 +541,10 @@ const MuseumVirtual = () => {
 
       {isLoaded && (
         <div>
-          <Scene style={{ display: contentDisplay }}>
+          <Scene 
+          style={{ display: contentDisplay }}
+          physics="driver: cannon; gravity: -9.8; debug: false"
+          >
             <a-assets>
               <a-mixin id="checkpoint"></a-mixin>
               <a-mixin id="checkpoint-hovered" color="#6CEEB5"></a-mixin>
@@ -657,10 +660,11 @@ const MuseumVirtual = () => {
               wasd-controls="acceleration: 35"
               run-controls={`normalSpeed: ${aceleracion}; runSpeed: ${aceleracion * 1.5}`}
               jump-controls
+              museum-boundaries 
               position="0 1.6 0"
-              dynamic-body
+              dynamic-body="mass: 1; shape: sphere; sphereRadius: 0.5"
               log-position
-            ></a-entity>
+            ></a-entity>  
           </Scene>
         </div>
       )}
